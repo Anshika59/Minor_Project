@@ -1,0 +1,26 @@
+# Known Phishing & Malicious Domains (Feed snapshot)
+paypa1-security-update.com
+paypal-account-verify.xyz
+paypal-login-security.net
+secure-appleid-verify.com
+appleid-support-recover.top
+microsoft-login-online.cf
+office365-verify-portal.tk
+chase-secure-banking-logon.com
+wellsfargo-verify-customer.info
+bofa-alert-protection.biz
+netflix-billing-update.xyz
+dhl-package-tracking-portal.com
+fedex-delivery-notice.online
+irs-tax-refund-claim.org
+account-update-center.xyz
+secure-login-attempt.tk
+verify-your-credentials.me
+malicious-payload-server.ru
+credential-harvester.buzz
+evil-tracker.com
+phish-site-sample.cc
+login-verification-auth.top
+urgent-account-support.icu
+billing-security-service.monster
+update-payment-card.shop

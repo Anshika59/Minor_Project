@@ -1,0 +1,72 @@
+{
+  "paypal": {
+    "name": "PayPal",
+    "legit_domains": ["paypal.com", "paypal.co.uk", "service.paypal.com", "intl.paypal.com"],
+    "keywords": ["paypal", "pay-pal", "paypal-security", "paypal-service"]
+  },
+  "microsoft": {
+    "name": "Microsoft",
+    "legit_domains": ["microsoft.com", "office365.com", "office.com", "live.com", "outlook.com"],
+    "keywords": ["microsoft", "office365", "o365", "onedrive", "sharepoint", "azure"]
+  },
+  "google": {
+    "name": "Google",
+    "legit_domains": ["google.com", "gmail.com", "googlemail.com", "accounts.google.com"],
+    "keywords": ["google", "gmail", "google drive", "google docs", "google security"]
+  },
+  "apple": {
+    "name": "Apple",
+    "legit_domains": ["apple.com", "icloud.com", "id.apple.com"],
+    "keywords": ["apple", "apple id", "icloud", "itunes"]
+  },
+  "amazon": {
+    "name": "Amazon",
+    "legit_domains": ["amazon.com", "amazon.co.uk", "amazon.de", "amazon.co.jp"],
+    "keywords": ["amazon", "amazon prime", "amazon order", "amazon security"]
+  },
+  "netflix": {
+    "name": "Netflix",
+    "legit_domains": ["netflix.com"],
+    "keywords": ["netflix", "netflix member", "netflix payment"]
+  },
+  "chase": {
+    "name": "Chase Bank",
+    "legit_domains": ["chase.com"],
+    "keywords": ["chase", "chase bank", "jpmorgan chase"]
+  },
+  "bankofamerica": {
+    "name": "Bank of America",
+    "legit_domains": ["bankofamerica.com", "bofa.com"],
+    "keywords": ["bank of america", "bofa"]
+  },
+  "wellsfargo": {
+    "name": "Wells Fargo",
+    "legit_domains": ["wellsfargo.com"],
+    "keywords": ["wells fargo", "wellsfargo"]
+  },
+  "dhl": {
+    "name": "DHL Express",
+    "legit_domains": ["dhl.com", "dhl.de"],
+    "keywords": ["dhl", "dhl express", "dhl tracking", "dhl delivery"]
+  },
+  "fedex": {
+    "name": "FedEx",
+    "legit_domains": ["fedex.com"],
+    "keywords": ["fedex", "fedex tracking", "fedex delivery"]
+  },
+  "docusign": {
+    "name": "DocuSign",
+    "legit_domains": ["docusign.com", "docusign.net"],
+    "keywords": ["docusign", "docu-sign", "signature requested"]
+  },
+  "linkedin": {
+    "name": "LinkedIn",
+    "legit_domains": ["linkedin.com"],
+    "keywords": ["linkedin", "connection request", "profile view"]
+  },
+  "irs": {
+    "name": "Internal Revenue Service (IRS)",
+    "legit_domains": ["irs.gov"],
+    "keywords": ["irs", "internal revenue service", "tax refund"]
+  }
+}

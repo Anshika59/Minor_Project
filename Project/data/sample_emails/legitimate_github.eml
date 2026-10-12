@@ -1,0 +1,25 @@
+From: "GitHub" <noreply@github.com>
+To: developer@organization.com
+Subject: [GitHub] Security advisory: Dependency vulnerabilities resolved in repo/project
+Date: Mon, 12 Oct 2026 08:30:12 +0000
+Message-ID: <github/repo/commit/1234@github.com>
+Reply-To: noreply@github.com
+Return-Path: <noreply@github.com>
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@github.com header.s=s20210204 header.b=AbCdEfGh;
+       spf=pass (google.com: domain of noreply@github.com designates 192.30.252.204 as permitted sender) smtp.mailfrom=noreply@github.com;
+       dmarc=pass (p=REJECT sp=REJECT dis=NONE) header.from=github.com
+Received-SPF: Pass (google.com: domain of noreply@github.com designates 192.30.252.204 as permitted sender)
+Received: from smtp.github.com (192.30.252.204) by mx.google.com with ESMTPS id g19si102948plk; Mon, 12 Oct 2026 08:30:13 +0000
+Content-Type: text/plain; charset="utf-8"
+
+Hi Developer,
+
+Dependabot has successfully detected and resolved known vulnerability CVE-2026-9912 in your project repository.
+The associated pull request #45 has been merged into main.
+
+You can inspect the security advisory details and full dependency graph at:
+https://github.com/settings/security
+
+Thanks,
+The GitHub Security Team

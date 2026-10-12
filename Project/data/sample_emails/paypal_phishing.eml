@@ -1,0 +1,24 @@
+From: "PayPal Account Security" <service-notice@paypal-account-verify.xyz>
+To: target-user@example.com
+Subject: URGENT: Your PayPal Account Has Been Suspended
+Date: Mon, 12 Oct 2026 09:14:02 +0000
+Message-ID: <20261012091402.12847@paypal-account-verify.xyz>
+Reply-To: diversion-drop@yahoo.com
+Return-Path: <bounce@paypal-account-verify.xyz>
+Authentication-Results: mx.google.com; spf=fail (google.com: domain of bounce@paypal-account-verify.xyz does not designate 185.220.101.5 as permitted sender) smtp.mailfrom=bounce@paypal-account-verify.xyz; dkim=fail
+Received-SPF: Fail (google.com: domain of bounce@paypal-account-verify.xyz does not designate 185.220.101.5 as permitted sender)
+Received: from mail.paypal-account-verify.xyz (185.220.101.5) by mx.google.com with ESMTPS id q18si928372plk; Mon, 12 Oct 2026 09:14:05 +0000
+Content-Type: text/plain; charset="utf-8"
+
+Dear Customer,
+
+We detected unauthorized activity on your PayPal account from an unrecognized IP address.
+For your protection, your access has been temporarily restricted.
+
+You must verify your identity within 24 hours or your account will be permanently closed.
+
+Please verify your credentials and update your credit card details immediately:
+http://paypal-account-verify.xyz/login
+
+Thank you for your prompt attention,
+PayPal Security & Fraud Prevention Department

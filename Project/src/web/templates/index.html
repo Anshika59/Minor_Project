@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Welcome / Intro Banner -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">Automated Phishing Triage & Awareness</h1>
+      <p class="hero-description">
+        Paste raw email content or upload an <code>.eml</code> file to inspect headers, evaluate SPF/DKIM/DMARC authenticity, detect masked links, analyze social engineering cues, and run our trained machine learning classification engine.
+      </p>
+    </div>
+  </section>
+
+  <!-- Input Form Section -->
+  <section class="card input-card">
+    <div class="card-header">
+      <div class="tabs-nav">
+        <button type="button" class="tab-btn active" data-tab="tab-paste">
+          <span class="tab-icon">📝</span> Paste Raw Email
+        </button>
+        <button type="button" class="tab-btn" data-tab="tab-upload">
+          <span class="tab-icon">📁</span> Upload .EML File
+        </button>
+      </div>
+      <div class="quick-samples">
+        <span class="samples-label">Quick Test Presets:</span>
+        <button type="button" class="sample-chip" data-sample="paypal_phishing.eml">PayPal Spoof</button>
+        <button type="button" class="sample-chip" data-sample="masked_link_phishing.eml">Masked Link</button>
+        <button type="button" class="sample-chip" data-sample="malware_attachment.eml">Trojan Attachment</button>
+        <button type="button" class="sample-chip" data-sample="legitimate_github.eml">Safe GitHub</button>
+      </div>
+    </div>
+
+    <form action="/analyze" method="POST" enctype="multipart/form-data" id="analysis-form">
+      <!-- Tab 1: Paste Text -->
+      <div class="tab-content active" id="tab-paste">
+        <label for="email_text" class="input-label">Paste raw email headers and body text:</label>
+        <textarea
+          id="email_text"
+          name="email_text"
+          class="code-textarea"
+          rows="10"
+          placeholder="From: Security Team <service@update-alert.xyz>&#10;To: user@company.com&#10;Subject: Urgent: Your account is suspended&#10;&#10;Dear Customer,&#10;We detected unauthorized login attempts. Verify immediately within 24 hours:&#10;http://update-alert.xyz/login"
+        ></textarea>
+      </div>
+
+      <!-- Tab 2: Upload File -->
+      <div class="tab-content" id="tab-upload">
+        <label class="file-drop-area" for="email_file" id="drop-area">
+          <div class="drop-icon">📤</div>
+          <div class="drop-text">
+            <strong>Click to select a file</strong> or drag and drop here
+          </div>
+          <div class="drop-hint">Supports .eml and .txt RFC822 email files (up to 16MB)</div>
+          <input type="file" id="email_file" name="email_file" accept=".eml,.txt" class="file-input">
+          <div class="selected-filename" id="selected-filename"></div>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="btn-submit">
+          <span class="btn-icon">⚡</span> Run Phishing Analysis
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-clear">
+          Clear
+        </button>
+      </div>
+    </form>
+  </section>
+
+  {% if error %}
+  <div class="alert alert-error">
+    <span class="alert-icon">⚠️</span>
+    <div class="alert-msg">{{ error }}</div>
+  </div>
+  {% endif %}
+
+  <!-- Analysis Results Section -->
+  {% if result %}
+  {% set verdict = result.final_verdict %}
+  {% set parsed = result.parsed_email %}
+  {% set sender = parsed.sender %}
+  {% set auth = result.header_analysis.authentication %}
+
+  <section class="results-section">
+    <!-- Top Verdict Header Card -->
+    <div class="card verdict-card verdict-{{ verdict.badge_color }}">
+      <div class="verdict-banner">
+        <div class="verdict-badge-box">
+          <span class="badge-verdict badge-{{ verdict.badge_color }}">
+            {% if verdict.final_label == 'Safe' %}🟢 SAFE
+            {% elif verdict.final_label == 'Suspicious' %}🟡 SUSPICIOUS
+            {% else %}🔴 PHISHING
+            {% endif %}
+          </span>
+          <span class="verdict-risk-tag">Risk Score: <strong>{{ verdict.risk_score }} / 100</strong></span>
+        </div>
+
+        <div class="verdict-meta">
+          <span class="meta-item">Confidence: <strong>{{ (verdict.confidence * 100)|round|int }}%</strong></span>
+          <span class="meta-item">Scan Duration: <strong>{{ result.execution_time_ms }} ms</strong></span>
+          <span class="meta-item">ML Probability: <strong>{{ result.ml_classification.phishing_percentage }}%</strong></span>
+        </div>
+      </div>
+
+      <!-- Risk Meter Bar -->
+      <div class="risk-bar-container">
+        <div class="risk-bar-labels">
+          <span>0 (Legitimate)</span>
+          <span>40 (Suspicious Threshold)</span>
+          <span>70 (Phishing Threshold)</span>
+          <span>100 (Critical)</span>
+        </div>
+        <div class="risk-bar-track">
+          <div class="risk-bar-fill fill-{{ verdict.badge_color }}" style="width: {{ verdict.risk_score }}%;"></div>
+        </div>
+      </div>
+
+      <!-- Recommendation Card -->
+      <div class="recommendation-box">
+        <div class="rec-title">📋 Recommended Action:</div>
+        <div class="rec-body">{{ verdict.recommendation }}</div>
+      </div>
+    </div>
+
+    <!-- Plain Language Explanations Card -->
+    <div class="card">
+      <div class="card-title-bar">
+        <h3>🔍 Plain-Language Threat Findings</h3>
+        <span class="badge badge-info">{{ verdict.plain_language_reasons|length }} Key Signals</span>
+      </div>
+      <div class="card-body">
+        <ul class="reason-list">
+          {% for reason in verdict.plain_language_reasons %}
+          <li class="reason-item">
+            <span class="reason-bullet">▸</span>
+            <span class="reason-text">{{ reason }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- 5 Module Signals Grid -->
+    <div class="signals-grid">
+      <!-- 1. ML Engine -->
+      <div class="signal-card">
+        <div class="signal-header">
+          <span class="signal-icon">🤖</span>
+          <h4>Machine Learning Engine</h4>
+        </div>
+        <div class="signal-metric">{{ result.ml_classification.phishing_percentage }}%</div>
+        <div class="signal-sub">Phishing Probability</div>
+        <div class="signal-detail">
+          Model: <code>{{ result.ml_classification.model_name }}</code><br>
+          Features Evaluated: {{ result.ml_classification.feature_contributions|length }}
+        </div>
+      </div>
+
+      <!-- 2. Header & Auth -->
+      <div class="signal-card">
+        <div class="signal-header">
+          <span class="signal-icon">✉️</span>
+          <h4>Sender & Authenticity</h4>
+        </div>
+        <div class="signal-metric">{{ result.header_analysis.risk_score }}/100</div>
+        <div class="signal-sub">Header Risk Score</div>
+        <div class="signal-detail">
+          SPF: <strong class="auth-status-{{ auth.spf }}">{{ auth.spf|upper }}</strong> &bull;
+          DKIM: <strong class="auth-status-{{ auth.dkim }}">{{ auth.dkim|upper }}</strong> &bull;
+          DMARC: <strong class="auth-status-{{ auth.dmarc }}">{{ auth.dmarc|upper }}</strong>
+        </div>
+      </div>
+
+      <!-- 3. URL Safety -->
+      <div class="signal-card">
+        <div class="signal-header">
+          <span class="signal-icon">🔗</span>
+          <h4>Links & Domains</h4>
+        </div>
+        <div class="signal-metric">{{ result.url_analysis.risk_score }}/100</div>
+        <div class="signal-sub">{{ result.url_analysis.total_urls }} Link(s) Extracted</div>
+        <div class="signal-detail">
+          Masked Links: <strong>{{ result.url_analysis.masked_count }}</strong><br>
+          Blacklisted: <strong>{{ result.url_analysis.blacklisted_count }}</strong> | Shortened: <strong>{{ result.url_analysis.shortener_count }}</strong>
+        </div>
+      </div>
+
+      <!-- 4. Content & NLP -->
+      <div class="signal-card">
+        <div class="signal-header">
+          <span class="signal-icon">💬</span>
+          <h4>Linguistic / NLP Analysis</h4>
+        </div>
+        <div class="signal-metric">{{ result.content_analysis.risk_score }}/100</div>
+        <div class="signal-sub">Social Engineering Score</div>
+        <div class="signal-detail">
+          Urgency: <strong>{{ result.content_analysis.urgency_score }}</strong> &bull;
+          Credentials: <strong>{{ result.content_analysis.credential_request_score }}</strong><br>
+          Generic Greeting: <strong>{{ 'Yes' if result.content_analysis.generic_greeting_detected else 'No' }}</strong>
+        </div>
+      </div>
+
+      <!-- 5. Attachments -->
+      <div class="signal-card">
+        <div class="signal-header">
+          <span class="signal-icon">📎</span>
+          <h4>Attachment Risks</h4>
+        </div>
+        <div class="signal-metric">{{ result.attachment_analysis.risk_score }}/100</div>
+        <div class="signal-sub">{{ result.attachment_analysis.attachment_count }} Attachment(s)</div>
+        <div class="signal-detail">
+          High-Risk Files: <strong>{{ result.attachment_analysis.risky_attachment_count }}</strong><br>
+          Double Extensions: <strong>{{ result.attachment_analysis.double_extension_count }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inspection Drawers -->
+    <div class="card detail-inspection-card">
+      <div class="inspection-tabs">
+        <button type="button" class="inspect-tab-btn active" data-target="detail-urls">
+          🔗 Extracted URLs ({{ result.url_analysis.total_urls }})
+        </button>
+        <button type="button" class="inspect-tab-btn" data-target="detail-headers">
+          ✉️ Sender & Header Details
+        </button>
+        <button type="button" class="inspect-tab-btn" data-target="detail-content">
+          📝 Flagged Keywords ({{ result.content_analysis.flagged_phrases|length }})
+        </button>
+        <button type="button" class="inspect-tab-btn" data-target="detail-attachments">
+          📎 Attachments ({{ result.attachment_analysis.attachment_count }})
+        </button>
+      </div>
+
+      <!-- Tab: URLs -->
+      <div class="inspect-tab-pane active" id="detail-urls">
+        {% if result.url_analysis.analyzed_links %}
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Displayed Anchor Text</th>
+                <th>Actual Destination URL</th>
+                <th>Domain</th>
+                <th>Security Flags</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for l in result.url_analysis.analyzed_links %}
+              <tr>
+                <td>
+                  {% if l.anchor_text %}
+                    <code>{{ l.anchor_text }}</code>
+                  {% else %}
+                    <span class="text-muted">(Plain URL)</span>
+                  {% endif %}
+                </td>
+                <td class="url-cell"><code>{{ l.url }}</code></td>
+                <td><strong>{{ l.domain }}</strong></td>
+                <td>
+                  {% if l.is_masked %}
+                    <span class="tag tag-danger">Masked Link</span>
+                  {% endif %}
+                  {% if l.is_blacklisted %}
+                    <span class="tag tag-danger">Blacklisted Domain</span>
+                  {% endif %}
+                  {% if l.is_shortener %}
+                    <span class="tag tag-warning">URL Shortener</span>
+                  {% endif %}
+                  {% if l.is_ip_address %}
+                    <span class="tag tag-danger">IP Host Address</span>
+                  {% endif %}
+                  {% if l.has_suspicious_tld %}
+                    <span class="tag tag-warning">Suspicious .{{ l.tld }}</span>
+                  {% endif %}
+                  {% if not l.flags %}
+                    <span class="tag tag-success">Clean Link</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="empty-state">No URLs found in the email body.</p>
+        {% endif %}
+      </div>
+
+      <!-- Tab: Headers -->
+      <div class="inspect-tab-pane" id="detail-headers">
+        <table class="info-table">
+          <tr>
+            <th>From Display Name:</th>
+            <td>{{ sender.name or '(None)' }}</td>
+          </tr>
+          <tr>
+            <th>Sender Email:</th>
+            <td><code>{{ sender.email }}</code></td>
+          </tr>
+          <tr>
+            <th>Sender Domain:</th>
+            <td><code>{{ sender.domain }}</code></td>
+          </tr>
+          <tr>
+            <th>Reply-To:</th>
+            <td><code>{{ parsed.reply_to.email or '(Same as sender)' }}</code></td>
+          </tr>
+          <tr>
+            <th>Return-Path:</th>
+            <td><code>{{ parsed.return_path.email or '(None)' }}</code></td>
+          </tr>
+          <tr>
+            <th>SPF Result:</th>
+            <td><span class="tag tag-{{ 'success' if auth.spf == 'pass' else 'danger' if auth.spf in ('fail','softfail') else 'neutral' }}">{{ auth.spf|upper }}</span></td>
+          </tr>
+          <tr>
+            <th>DKIM Result:</th>
+            <td><span class="tag tag-{{ 'success' if auth.dkim == 'pass' else 'danger' if auth.dkim == 'fail' else 'neutral' }}">{{ auth.dkim|upper }}</span></td>
+          </tr>
+          <tr>
+            <th>DMARC Result:</th>
+            <td><span class="tag tag-{{ 'success' if auth.dmarc == 'pass' else 'danger' if auth.dmarc == 'fail' else 'neutral' }}">{{ auth.dmarc|upper }}</span></td>
+          </tr>
+          <tr>
+            <th>Routing Relays:</th>
+            <td>{{ parsed.received_hops }} hop(s)</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Tab: Content -->
+      <div class="inspect-tab-pane" id="detail-content">
+        {% if result.content_analysis.flagged_phrases %}
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Matched Text</th>
+                <th>Threat Pattern</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in result.content_analysis.flagged_phrases %}
+              <tr>
+                <td><span class="tag tag-warning">{{ p.category|replace('_', ' ')|capitalize }}</span></td>
+                <td><mark class="highlight-phish">{{ p.matched_text }}</mark></td>
+                <td>{{ p.label }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="empty-state">No psychological urgency or credential harvesting keywords detected in text.</p>
+        {% endif %}
+      </div>
+
+      <!-- Tab: Attachments -->
+      <div class="inspect-tab-pane" id="detail-attachments">
+        {% if result.attachment_analysis.analyzed_attachments %}
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Filename</th>
+                <th>MIME Content-Type</th>
+                <th>Extension</th>
+                <th>Double Extension</th>
+                <th>Risk Evaluation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for att in result.attachment_analysis.analyzed_attachments %}
+              <tr>
+                <td><code>{{ att.filename }}</code></td>
+                <td>{{ att.content_type }}</td>
+                <td><strong>.{{ att.extension }}</strong></td>
+                <td>
+                  {% if att.has_double_extension %}
+                    <span class="tag tag-danger">YES (Deceptive)</span>
+                  {% else %}
+                    <span class="tag tag-success">No</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if att.risk_points > 0 %}
+                    <span class="tag tag-danger">HIGH RISK ({{ att.risk_points }} pts)</span>
+                  {% else %}
+                    <span class="tag tag-success">Standard File</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="empty-state">No attachments detected in this message.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Download & Actions Bar -->
+    <div class="actions-card">
+      <form action="/download/json" method="POST">
+        <input type="hidden" name="result_data" value="{{ result|tojson|forceescape }}">
+        <button type="submit" class="btn btn-secondary">
+          💾 Download Analysis JSON
+        </button>
+      </form>
+      <button type="button" class="btn btn-secondary" onclick="window.print()">
+        🖨️ Print / Save PDF
+      </button>
+      <a href="/" class="btn btn-primary">
+        🔄 Analyze Another Email
+      </a>
+    </div>
+
+  </section>
+  {% endif %}
+
+  <!-- Methodology & Architecture Section -->
+  <section class="card methodology-card" id="how-it-works">
+    <div class="card-header">
+      <h3 class="card-title">System Architecture & Methodology</h3>
+    </div>
+    <div class="card-body">
+      <div class="method-steps">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>MIME Parsing & Ingestion</h4>
+            <p>Deconstructs RFC822 / MIME emails into structured headers, body payload, links, and attachments.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Sender & Header Authenticity</h4>
+            <p>Analyzes SPF, DKIM, DMARC alignment, brand display name spoofing, and Levenshtein typosquatting.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Link & URL Safety Analysis</h4>
+            <p>Detects masked hyperlinks (anchor vs target href), checks PhishTank/OpenPhish feeds, IP hosts, and shorteners.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Linguistic & NLP Analysis</h4>
+            <p>Evaluates urgency cues, coercion threats, credential harvesting patterns, and generic salutations.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h4>Machine Learning Engine</h4>
+            <p>Trained Random Forest classifier combining engineered security features with TF-IDF n-gram text vectors.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">6</div>
+          <div class="step-content">
+            <h4>Rule-Based Aggregation</h4>
+            <p>Blends ML probability with deterministic escalation overrides into final Safe, Suspicious, or Phishing labels.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

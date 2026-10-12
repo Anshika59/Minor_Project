@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Phishing Email Detector{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-shield">🛡️</span>
+        <div class="brand-text">
+          <span class="brand-title">PhishGuard</span>
+          <span class="brand-subtitle">AI & Multi-Layer Phishing Detector</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link active">Analysis Console</a>
+        <a href="#how-it-works" class="nav-link">Methodology & Layers</a>
+        <span class="badge badge-version">v1.0 Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <p>Phishing Email Detector &mdash; Automated VETS-Oriented Security Triage System</p>
+      <div class="footer-meta">
+        <span>Hybrid Architecture: Email MIME Parser &bull; Header SPF/DKIM &bull; URL Blacklist Feed &bull; NLP Engine &bull; Scikit-Learn ML</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
